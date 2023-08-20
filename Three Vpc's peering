@@ -1,0 +1,87 @@
+------------------------| HOW TO PEER THREE ISOLATED VPC'S |------------------------------------------
+S-1 First of all open aws management console in your browser....
+    NOTE:- For example purpose i am creating three vpc's in three different regions for example..
+           [VPC-A]:- Creeating in us-west-1 [Calfornia]
+           [VPC-B]:- Creating in ap-south-1a [Mumbai]
+           [VPC-C]:- Creating in us-west-2 [Oregean]
+
+------------------------| FIRST I WILL CREATE VPC IN CALFORNIA REGION |------------------
+     1. CREATE VPC [CALFORNIA]
+        GIVE NAME :- VPC-A 
+        ASSIGNED IPV4CIDR BLOCK [FOR EG 141.140.0.0/20]
+        CREATE PUBLIC SUBNET , PRIVATE SUBNET [141.140.0.0/22 , 141.140.4.0/22]
+        CREATE ROUTE TABLE [BY DEFAULT WHENEVER VPC IS CREATE ONE DEFAULT ROUTE TABLE IS CREATED] ASSOCIATE SUBNET IN RESPECTIVE ROUTE TABLES
+        ATTACHED INTERNET GATEWAY, AND MAKE ENTRY TO THE ROUTE TABLE [PUBLIC-RT]
+        NOW LAUNCH THE INSTANCE OF PUBLIC AS WELL AS PRIVATE [ I AM LAUNCHING EC2 INSTANCE OF AMAZON LINUX, Security group ssh[CUSTOM], ALL ICMP IPV4[ANYWHERE] ]
+        AFTER LAUNCHING INSTANCE CHECK WHETHER THE INTERNET CONNIVETY IS AVILABLE OR NOT FOR THAT  in MOBAXTREAM OR PUTTY
+        # [ping www.google.com]
+        CREATE A FILE WITH ANY NAME [touch key.pem]
+        #[ec2-user141.140.0.67.90]# touch key.pem
+        # [ec2-user141.140.0.67.90]#vi key.pem
+          enter the encrypted private key here and the save the file
+        # [ec2-user141.140.0.67.90]#chmod 600 key.pem 
+        # [ec2-user141.140.0.67.90]#ssh -i key.pem ec2-user@141.140.68.99
+        # [ec2-user141.140.0.68.99] 
+          After you are succesful login to private subnet
+
+ 
+-----You susscefully login to private subnet-------------------------------
+     2.  CREATE VPC [MUMBAI] ======> CREATING VPC IN MUMBAI REGION
+         GIVEN NAME :- VPC-B
+         ASSIGNED IPV4CIDR BLOCK [FOR EG 10.0.0.0/28]
+         CREATE PRIVATE SUBNET AS [10.0.0.0/23]
+         CREATE ROUTE TABLE ASSOCIATE SUBNET IN RESPECTIVE TABLE
+         LAUNCH INSTANCE IN EC2 AS A PRIVATE INSTANCE   
+
+
+------------------//////--------------------------------------------------
+    3. NOW WE HAVE TO MAKE COMMUNICTAION BETWEEN TWO VPC's FOR THAT WE HAVE TO DO VPC'S PEERING 
+       GO TO AWS VPC PEERING OPTION 
+       NOW IT COMES CRUTIAL PART THAT WHO WILL REQUEST THE CONNECTION AND WHO WILL ACCEPT THE CONNECTION IN MY CASE 
+       VPC-A WILL REQUEST THE PAIR TO VPC-B 
+        VPC-A ------------> VPC-B
+     CREATE REQUEST PAIR FROM VPC-A  TO   VPC-B   
+        IN VPC-B ====THAT IS IN MUMBAI REGION IN VPC PEERING OPTION YOU WILL SEE THE PENDING REQUEST SO ACCEPT THAT REQUEST
+        AFTER ACCEPTING THE REQUEST MODIFY THE ROUTH TABLES
+    NOW========>  IN VPC-A
+          # [ec2-user141.140.0.67.90]# ping 141.140.68.90
+          // After ping succesful//
+          # [ec2-user 141.140.67.90]# touch key.pem
+          # [ec2-user 141.140.67.90]# vi key.pem
+           ENTER PRIVATE RSA KEY AND SAVE THE FILE 
+          # [ec2-user 141.140.67.90]# Chmod 600 key.pem
+          # [ec2-user 141.140.67.90]# ssh-i key.pem ec2-user@privateip
+          # [ec2-user 141.140.68.90]# // now we have to vpc-b //
+          # [ec2-user 141.140.68.90]# ping 10.0.0.7
+          // After sussueful ping //
+          # [ec2-user 141.140.68.90]# vi key2.pem 
+           // upload mumbaikey here that is private rsa//
+          #[ec2-user 141.140.68.90]# chmod 600 key2.pem 
+          #[ec2-user 141.140.68.90]# ssh -i key2.pem ec2-user@10.0.0.9
+          #[ec2-user 10.0.0.9]# [ vpc-B]
+
+------------------------------------------------------------////////////////-------------------------------------------------------------------------------
+    4. CREATE VPC-C IN OREGEON REGION DO SAME AS PREVIOUS 
+       DO VPC ---PERING 
+       NOW VPC-B ===========> VPC-C
+       THEN VPC
+       # [ec2-user141.140.0.67.90]# ping 141.140.68.90 //// VPC-A
+          // After ping succesful//
+          # [ec2-user 141.140.67.90]# touch key.pem
+          # [ec2-user 141.140.67.90]# vi key.pem
+           ENTER PRIVATE RSA KEY AND SAVE THE FILE 
+          # [ec2-user 141.140.67.90]# Chmod 600 key.pem
+          # [ec2-user 141.140.67.90]# ssh-i key.pem ec2-user@privateip
+          # [ec2-user 141.140.68.90]# // now we have to vpc-b // VPC-B
+          # [ec2-user 141.140.68.90]# ping 10.0.0.7
+          // After sussueful ping //
+          # [ec2-user 141.140.68.90]# vi key2.pem 
+           // upload mumbaikey here that is private rsa//
+          #[ec2-user 141.140.68.90]# chmod 600 key2.pem 
+          #[ec2-user 141.140.68.90]# ssh -i key2.pem ec2-user@10.0.0.9
+          #[ec2-user 10.0.0.9]# [ vpc-B]  
+          #[ec2-user 10.0.0.9] vi key3.pem
+          ////enter oregon key here private rsa///
+          #[ec2-user 10.0.0.9] chmod 600 key3.pem
+          #[ec2-user 10.0.0.9] ssh -i key3.pem ec2-user@163.164.90.80
+          #[ec2-user 163.164.90.89] //////VPC-C
